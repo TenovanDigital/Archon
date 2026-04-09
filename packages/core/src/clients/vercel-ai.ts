@@ -195,8 +195,13 @@ export class VercelAiClient implements IAssistantClient {
     resumeSessionId?: string,
     options?: AssistantRequestOptions
   ): AsyncGenerator<MessageChunk> {
-    if (resumeSessionId) {
+    if (resumeSessionId && !options?.conversationHistory?.length) {
       getLog().debug({ resumeSessionId }, 'session_resume_ignored (Vercel AI SDK is stateless)');
+    } else if (resumeSessionId && options?.conversationHistory?.length) {
+      getLog().debug(
+        { resumeSessionId, historyLength: options.conversationHistory.length },
+        'session_resume_via_history'
+      );
     }
 
     const model = options?.model;
@@ -226,7 +231,24 @@ export class VercelAiClient implements IAssistantClient {
       mcpCleanup = result.cleanup;
     }
 
-    const messages = [{ role: 'user' as const, content: prompt }];
+    // Build messages array with conversation history for session continuity
+    const historyMessages = (options?.conversationHistory ?? []).map(msg => {
+      if (msg.role === 'user' || msg.role === 'assistant') {
+        return { role: msg.role, content: msg.content };
+      }
+      if (msg.role === 'tool_call') {
+        return {
+          role: 'assistant' as const,
+          content: `[Tool: ${msg.toolName}] ${msg.content}`,
+        };
+      }
+      // tool_result
+      return {
+        role: 'user' as const,
+        content: `[Tool result: ${msg.toolName}] ${msg.content}`,
+      };
+    });
+    const messages = [...historyMessages, { role: 'user' as const, content: prompt }];
 
     // Add system prompt if provided
     const systemPrompt = options?.systemPrompt;

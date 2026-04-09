@@ -358,6 +358,21 @@ export interface AssistantRequestOptions {
    * Claude only — ignored for Codex.
    */
   sandbox?: SandboxSettings;
+  /**
+   * Conversation history for stateless providers (Vercel AI).
+   * When provided, prepended to the messages array before the current prompt.
+   * Vercel AI only — ignored for Claude and Codex (they use resumeSessionId).
+   */
+  conversationHistory?: ConversationMessage[];
+}
+
+/** Provider-neutral conversation message for Vercel AI history accumulation.
+ *  Structurally identical to the copy in @archon/workflows/deps — keep in sync. */
+export interface ConversationMessage {
+  role: 'user' | 'assistant' | 'tool_call' | 'tool_result';
+  content: string;
+  toolName?: string;
+  toolInput?: Record<string, unknown>;
 }
 
 /**

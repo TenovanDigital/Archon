@@ -48,6 +48,15 @@ export type WorkflowMessageChunk =
   | { type: 'tool_result'; toolName: string; toolOutput: string }
   | { type: 'workflow_dispatch'; workerConversationId: string; workflowName: string };
 
+/** Provider-neutral conversation message for Vercel AI history accumulation.
+ *  Kept in @archon/workflows to avoid circular dependency with @archon/core. */
+export interface ConversationMessage {
+  role: 'user' | 'assistant' | 'tool_call' | 'tool_result';
+  content: string;
+  toolName?: string;
+  toolInput?: Record<string, unknown>;
+}
+
 export interface WorkflowMessageMetadata {
   category?:
     | 'tool_call_formatted'
@@ -190,6 +199,12 @@ export interface WorkflowAssistantOptions {
    * Structural match for SDK SandboxSettings.
    */
   sandbox?: SandboxSettings;
+  /**
+   * Conversation history for stateless providers (Vercel AI).
+   * When provided, prepended to the messages array before the current prompt.
+   * Vercel AI only — ignored for Claude and Codex (they use resumeSessionId).
+   */
+  conversationHistory?: ConversationMessage[];
 }
 
 // ---------------------------------------------------------------------------
