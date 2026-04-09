@@ -28,7 +28,13 @@ export async function writeConfigFile(
 ): Promise<void> {
   await writeFile(path, content, { encoding: 'utf-8', ...options });
 }
-import type { GlobalConfig, RepoConfig, MergedConfig, SafeConfig } from './config-types';
+import type {
+  GlobalConfig,
+  RepoConfig,
+  MergedConfig,
+  SafeConfig,
+  VercelAiAssistantDefaults,
+} from './config-types';
 import { createLogger } from '@archon/paths';
 
 /** Lazy-initialized logger (deferred so test mocks can intercept createLogger) */
@@ -494,6 +500,25 @@ export async function updateGlobalConfig(updates: Partial<GlobalConfig>): Promis
       merged.assistants = {
         claude: { ...current.assistants?.claude, ...updates.assistants.claude },
         codex: { ...current.assistants?.codex, ...updates.assistants.codex },
+        'vercel-ai': ((): VercelAiAssistantDefaults => {
+          const currentVai = current.assistants?.['vercel-ai'] ?? {};
+          const updateVai = updates.assistants['vercel-ai'] as
+            | ((typeof updates.assistants)['vercel-ai'] & { baseURL?: string })
+            | undefined;
+          const { baseURL, ...rest } = updateVai ?? {};
+          const merged: VercelAiAssistantDefaults = { ...currentVai, ...rest };
+          // Map flat baseURL into providers.<provider>.baseURL
+          if (baseURL !== undefined) {
+            const provider = (updateVai?.model ?? currentVai.model)?.split('/')[0];
+            if (provider) {
+              merged.providers = {
+                ...merged.providers,
+                [provider]: { ...merged.providers?.[provider], baseURL },
+              };
+            }
+          }
+          return merged;
+        })(),
       };
     }
 
@@ -546,6 +571,18 @@ export function toSafeConfig(config: MergedConfig): SafeConfig {
       },
       'vercel-ai': {
         model: config.assistants['vercel-ai'].model,
+        baseURL: ((): string | undefined => {
+          const providers = config.assistants['vercel-ai'].providers;
+          if (!providers) return undefined;
+          // Extract provider name from model (e.g., "ollama/llama3" → "ollama")
+          const modelProvider = config.assistants['vercel-ai'].model?.split('/')[0];
+          if (modelProvider && providers[modelProvider]?.baseURL) {
+            return providers[modelProvider].baseURL;
+          }
+          // Fallback: return the first provider's baseURL
+          const first = Object.values(providers)[0];
+          return first?.baseURL;
+        })(),
       },
     },
     streaming: {

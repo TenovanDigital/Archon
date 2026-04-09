@@ -1840,6 +1840,7 @@ export interface components {
         };
         'vercel-ai': {
           model?: string;
+          baseURL?: string;
         };
       };
       streaming: {
@@ -1880,6 +1881,7 @@ export interface components {
       };
       'vercel-ai'?: {
         model: string;
+        baseURL?: string;
       };
     };
     IsolationEnvironment: {

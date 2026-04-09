@@ -15,7 +15,7 @@ export const safeConfigSchema = z
         modelReasoningEffort: z.enum(['minimal', 'low', 'medium', 'high', 'xhigh']).optional(),
         webSearchMode: z.enum(['disabled', 'cached', 'live']).optional(),
       }),
-      'vercel-ai': z.object({ model: z.string().optional() }),
+      'vercel-ai': z.object({ model: z.string().optional(), baseURL: z.string().optional() }),
     }),
     streaming: z.object({
       telegram: z.enum(['stream', 'batch']),
@@ -51,6 +51,7 @@ export const updateAssistantConfigBodySchema = z
     'vercel-ai': z
       .object({
         model: z.string(),
+        baseURL: z.string().optional(),
       })
       .optional(),
   })

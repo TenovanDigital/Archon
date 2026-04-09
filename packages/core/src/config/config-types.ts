@@ -292,7 +292,7 @@ export interface SafeConfig {
   assistants: {
     claude: Pick<ClaudeAssistantDefaults, 'model'>;
     codex: Pick<AssistantDefaults, 'model' | 'modelReasoningEffort' | 'webSearchMode'>;
-    'vercel-ai': Pick<VercelAiAssistantDefaults, 'model'>;
+    'vercel-ai': Pick<VercelAiAssistantDefaults, 'model'> & { baseURL?: string };
   };
   streaming: {
     telegram: 'stream' | 'batch';

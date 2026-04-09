@@ -461,6 +461,9 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
   const [claudeModel, setClaudeModel] = useState(config.assistants.claude.model ?? 'sonnet');
   const [codexModel, setCodexModel] = useState(config.assistants.codex.model ?? '');
   const [vercelAiModel, setVercelAiModel] = useState(config.assistants['vercel-ai']?.model ?? '');
+  const [vercelAiBaseURL, setVercelAiBaseURL] = useState(
+    config.assistants['vercel-ai']?.baseURL ?? ''
+  );
   const [reasoning, setReasoning] = useState<'minimal' | 'low' | 'medium' | 'high' | 'xhigh'>(
     config.assistants.codex.modelReasoningEffort ?? 'medium'
   );
@@ -474,6 +477,7 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
     claudeModel !== (config.assistants.claude.model ?? 'sonnet') ||
     codexModel !== (config.assistants.codex.model ?? '') ||
     vercelAiModel !== (config.assistants['vercel-ai']?.model ?? '') ||
+    vercelAiBaseURL !== (config.assistants['vercel-ai']?.baseURL ?? '') ||
     reasoning !== (config.assistants.codex.modelReasoningEffort ?? 'medium') ||
     webSearch !== (config.assistants.codex.webSearchMode ?? 'disabled');
 
@@ -482,6 +486,7 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
     setClaudeModel(config.assistants.claude.model ?? 'sonnet');
     setCodexModel(config.assistants.codex.model ?? '');
     setVercelAiModel(config.assistants['vercel-ai']?.model ?? '');
+    setVercelAiBaseURL(config.assistants['vercel-ai']?.baseURL ?? '');
     setReasoning(config.assistants.codex.modelReasoningEffort ?? 'medium');
     setWebSearch(config.assistants.codex.webSearchMode ?? 'disabled');
   }, [config]);
@@ -511,7 +516,14 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
             codex: { model: codexModel, modelReasoningEffort: reasoning, webSearchMode: webSearch },
           }
         : {}),
-      ...(vercelAiModel ? { 'vercel-ai': { model: vercelAiModel } } : {}),
+      ...(vercelAiModel
+        ? {
+            'vercel-ai': {
+              model: vercelAiModel,
+              ...(vercelAiBaseURL ? { baseURL: vercelAiBaseURL } : {}),
+            },
+          }
+        : {}),
     });
   }
 
@@ -599,6 +611,16 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
                 setVercelAiModel(e.target.value);
               }}
               placeholder="ollama/llama3"
+            />
+
+            <label htmlFor="vercel-ai-base-url">Vercel AI Base URL</label>
+            <Input
+              id="vercel-ai-base-url"
+              value={vercelAiBaseURL}
+              onChange={e => {
+                setVercelAiBaseURL(e.target.value);
+              }}
+              placeholder="http://192.168.1.100:11434/v1"
             />
           </div>
 
