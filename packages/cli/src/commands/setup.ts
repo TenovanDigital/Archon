@@ -538,6 +538,11 @@ async function collectAIConfig(): Promise<SetupConfig['ai']> {
     options: [
       { value: 'claude', label: 'Claude (Recommended)', hint: 'Anthropic Claude Code SDK' },
       { value: 'codex', label: 'Codex', hint: 'OpenAI Codex SDK' },
+      {
+        value: 'vercel-ai',
+        label: 'Vercel AI',
+        hint: 'Ollama, OpenAI, Groq, Mistral via AI SDK',
+      },
     ],
     required: false,
   });
@@ -549,6 +554,7 @@ async function collectAIConfig(): Promise<SetupConfig['ai']> {
 
   let hasClaude = assistants.includes('claude');
   let hasCodex = assistants.includes('codex');
+  const hasVercelAi = assistants.includes('vercel-ai');
 
   // Check if selected CLI tools are installed
   if (hasClaude && !isCommandAvailable('claude')) {
@@ -648,7 +654,7 @@ After upgrading, run 'archon setup' again.`,
     }
   }
 
-  if (!hasClaude && !hasCodex) {
+  if (!hasClaude && !hasCodex && !hasVercelAi) {
     log.warning('No AI assistant selected. You can add one later by running `archon setup` again.');
     return {
       claude: false,
@@ -679,14 +685,17 @@ After upgrading, run 'archon setup' again.`,
   // Determine default assistant
   let defaultAssistant: 'claude' | 'codex' | 'vercel-ai' = 'claude';
 
-  if (hasClaude && hasCodex) {
+  const selectedCount = [hasClaude, hasCodex, hasVercelAi].filter(Boolean).length;
+  if (selectedCount > 1) {
+    const options: { value: 'claude' | 'codex' | 'vercel-ai'; label: string }[] = [];
+    if (hasClaude) options.push({ value: 'claude', label: 'Claude (Recommended)' });
+    if (hasCodex) options.push({ value: 'codex', label: 'Codex' });
+    if (hasVercelAi)
+      options.push({ value: 'vercel-ai', label: 'Vercel AI (Ollama, OpenAI, Groq, etc.)' });
+
     const defaultChoice = await select({
       message: 'Which should be the default AI assistant?',
-      options: [
-        { value: 'claude' as const, label: 'Claude (Recommended)' },
-        { value: 'codex' as const, label: 'Codex' },
-        { value: 'vercel-ai' as const, label: 'Vercel AI (Ollama, OpenAI, Groq, etc.)' },
-      ],
+      options,
     });
 
     if (isCancel(defaultChoice)) {
@@ -697,6 +706,8 @@ After upgrading, run 'archon setup' again.`,
     defaultAssistant = defaultChoice;
   } else if (hasCodex && !hasClaude) {
     defaultAssistant = 'codex';
+  } else if (hasVercelAi && !hasClaude) {
+    defaultAssistant = 'vercel-ai';
   }
 
   return {
