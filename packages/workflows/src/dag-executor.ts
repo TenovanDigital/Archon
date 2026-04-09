@@ -45,7 +45,7 @@ import { formatToolCall } from './utils/tool-formatter';
 import { createLogger } from '@archon/paths';
 import { getWorkflowEventEmitter } from './event-emitter';
 import { evaluateCondition } from './condition-evaluator';
-import { isClaudeModel, isModelCompatible } from './model-validation';
+import { isClaudeModel, isVercelAiModel, isModelCompatible } from './model-validation';
 import {
   logNodeStart,
   logNodeComplete,
@@ -362,7 +362,7 @@ function expandEnvVars(config: Record<string, unknown>): {
  */
 async function resolveNodeProviderAndModel(
   node: DagNode,
-  workflowProvider: 'claude' | 'codex',
+  workflowProvider: 'claude' | 'codex' | 'vercel-ai',
   workflowModel: string | undefined,
   config: WorkflowConfig,
   platform: IWorkflowPlatform,
@@ -371,16 +371,18 @@ async function resolveNodeProviderAndModel(
   cwd: string,
   workflowLevelOptions: WorkflowLevelOptions
 ): Promise<{
-  provider: 'claude' | 'codex';
+  provider: 'claude' | 'codex' | 'vercel-ai';
   model: string | undefined;
   options: WorkflowAssistantOptions | undefined;
 }> {
-  let provider: 'claude' | 'codex';
+  let provider: 'claude' | 'codex' | 'vercel-ai';
 
   if (node.provider) {
     provider = node.provider;
   } else if (node.model && isClaudeModel(node.model)) {
     provider = 'claude';
+  } else if (node.model && isVercelAiModel(node.model)) {
+    provider = 'vercel-ai';
   } else if (node.model) {
     provider = 'codex';
   } else {
@@ -716,7 +718,7 @@ async function executeNodeInternal(
   cwd: string,
   workflowRun: WorkflowRun,
   node: CommandNode | PromptNode,
-  provider: 'claude' | 'codex',
+  provider: 'claude' | 'codex' | 'vercel-ai',
   nodeOptions: WorkflowAssistantOptions | undefined,
   artifactsDir: string,
   logDir: string,
@@ -1667,7 +1669,7 @@ async function executeScriptNode(
  * Caller is responsible for resolving per-node overrides before passing model.
  */
 function buildLoopNodeOptions(
-  provider: 'claude' | 'codex',
+  provider: 'claude' | 'codex' | 'vercel-ai',
   model: string | undefined,
   config: WorkflowConfig
 ): WorkflowAssistantOptions | undefined {
@@ -1704,7 +1706,7 @@ async function executeLoopNode(
   cwd: string,
   workflowRun: WorkflowRun,
   node: LoopNode,
-  workflowProvider: 'claude' | 'codex',
+  workflowProvider: 'claude' | 'codex' | 'vercel-ai',
   workflowModel: string | undefined,
   artifactsDir: string,
   logDir: string,
@@ -2192,7 +2194,7 @@ async function executeApprovalNode(
   deps: WorkflowDeps,
   platform: IWorkflowPlatform,
   conversationId: string,
-  workflowProvider: 'claude' | 'codex',
+  workflowProvider: 'claude' | 'codex' | 'vercel-ai',
   workflowModel: string | undefined,
   cwd: string,
   artifactsDir: string,
@@ -2362,7 +2364,7 @@ export async function executeDagWorkflow(
   cwd: string,
   workflow: { name: string; nodes: readonly DagNode[] } & WorkflowLevelOptions,
   workflowRun: WorkflowRun,
-  workflowProvider: 'claude' | 'codex',
+  workflowProvider: 'claude' | 'codex' | 'vercel-ai',
   workflowModel: string | undefined,
   artifactsDir: string,
   logDir: string,
@@ -2599,11 +2601,13 @@ export async function executeDagWorkflow(
           // 3b. Loop node dispatch — manages its own AI sessions and iteration
           if (isLoopNode(node)) {
             // Resolve per-node provider/model overrides (same logic as other node types)
-            let loopProvider: 'claude' | 'codex';
+            let loopProvider: 'claude' | 'codex' | 'vercel-ai';
             if (node.provider) {
               loopProvider = node.provider;
             } else if (node.model && isClaudeModel(node.model)) {
               loopProvider = 'claude';
+            } else if (node.model && isVercelAiModel(node.model)) {
+              loopProvider = 'vercel-ai';
             } else if (node.model) {
               loopProvider = 'codex';
             } else {

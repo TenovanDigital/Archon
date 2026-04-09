@@ -25,6 +25,7 @@ export {
   isWebAdapter,
   type MessageMetadata,
   type MessageChunk,
+  type AssistantProvider,
   type IAssistantClient,
 } from './types';
 
@@ -57,6 +58,7 @@ export { SessionNotFoundError } from './db/sessions';
 // =============================================================================
 export { ClaudeClient } from './clients/claude';
 export { CodexClient } from './clients/codex';
+export { VercelAiClient } from './clients/vercel-ai';
 export { getAssistantClient } from './clients/factory';
 
 // =============================================================================

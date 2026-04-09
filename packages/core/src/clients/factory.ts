@@ -7,6 +7,7 @@
 import type { IAssistantClient } from '../types';
 import { ClaudeClient } from './claude';
 import { CodexClient } from './codex';
+import { VercelAiClient } from './vercel-ai';
 import { createLogger } from '@archon/paths';
 
 /** Lazy-initialized logger (deferred so test mocks can intercept createLogger) */
@@ -31,7 +32,12 @@ export function getAssistantClient(type: string): IAssistantClient {
     case 'codex':
       getLog().debug({ provider: 'codex' }, 'client_selected');
       return new CodexClient();
+    case 'vercel-ai':
+      getLog().debug({ provider: 'vercel-ai' }, 'client_selected');
+      return new VercelAiClient();
     default:
-      throw new Error(`Unknown assistant type: ${type}. Supported types: 'claude', 'codex'`);
+      throw new Error(
+        `Unknown assistant type: ${type}. Supported types: 'claude', 'codex', 'vercel-ai'`
+      );
   }
 }

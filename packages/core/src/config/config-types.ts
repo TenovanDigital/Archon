@@ -10,7 +10,7 @@
  * Global configuration (non-secret user preferences)
  * Located at ~/.archon/config.yaml
  */
-import type { ModelReasoningEffort, WebSearchMode } from '../types';
+import type { AssistantProvider, ModelReasoningEffort, WebSearchMode } from '../types';
 
 export interface AssistantDefaults {
   model?: string;
@@ -27,6 +27,15 @@ export interface ClaudeAssistantDefaults {
   settingSources?: ('project' | 'user')[];
 }
 
+export interface VercelAiAssistantDefaults {
+  /** Default model in `provider/model` format (e.g., `ollama/llama3`). */
+  model?: string;
+  /** Max agentic loop steps for Vercel AI SDK `streamText`. @default 10 */
+  maxSteps?: number;
+  /** Per-sub-provider overrides (baseURL, apiKey). Keyed by provider name (e.g., `ollama`). */
+  providers?: Record<string, { baseURL?: string; apiKey?: string }>;
+}
+
 export interface GlobalConfig {
   /**
    * Bot display name (shown in messages)
@@ -38,7 +47,7 @@ export interface GlobalConfig {
    * Default AI assistant when no codebase-specific preference
    * @default 'claude'
    */
-  defaultAssistant?: 'claude' | 'codex';
+  defaultAssistant?: AssistantProvider;
 
   /**
    * Assistant-specific defaults (model, reasoning effort, etc.)
@@ -46,6 +55,7 @@ export interface GlobalConfig {
   assistants?: {
     claude?: ClaudeAssistantDefaults;
     codex?: AssistantDefaults;
+    'vercel-ai'?: VercelAiAssistantDefaults;
   };
 
   /**
@@ -109,7 +119,7 @@ export interface RepoConfig {
    * AI assistant preference for this repository
    * Overrides global default
    */
-  assistant?: 'claude' | 'codex';
+  assistant?: AssistantProvider;
 
   /**
    * Assistant-specific defaults for this repository
@@ -117,6 +127,7 @@ export interface RepoConfig {
   assistants?: {
     claude?: ClaudeAssistantDefaults;
     codex?: AssistantDefaults;
+    'vercel-ai'?: VercelAiAssistantDefaults;
   };
 
   /**
@@ -212,10 +223,11 @@ export interface RepoConfig {
  */
 export interface MergedConfig {
   botName: string;
-  assistant: 'claude' | 'codex';
+  assistant: AssistantProvider;
   assistants: {
     claude: ClaudeAssistantDefaults;
     codex: AssistantDefaults;
+    'vercel-ai': VercelAiAssistantDefaults;
   };
   streaming: {
     telegram: 'stream' | 'batch';
@@ -276,10 +288,11 @@ export interface MergedConfig {
  */
 export interface SafeConfig {
   botName: string;
-  assistant: 'claude' | 'codex';
+  assistant: AssistantProvider;
   assistants: {
     claude: Pick<ClaudeAssistantDefaults, 'model'>;
     codex: Pick<AssistantDefaults, 'model' | 'modelReasoningEffort' | 'webSearchMode'>;
+    'vercel-ai': Pick<VercelAiAssistantDefaults, 'model'>;
   };
   streaming: {
     telegram: 'stream' | 'batch';

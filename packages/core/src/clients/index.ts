@@ -10,6 +10,7 @@
 
 export { ClaudeClient } from './claude';
 export { CodexClient } from './codex';
+export { VercelAiClient } from './vercel-ai';
 export { getAssistantClient } from './factory';
 
 // Re-export types for consumers importing from this submodule directly

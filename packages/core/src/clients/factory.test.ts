@@ -19,21 +19,29 @@ describe('factory', () => {
       expect(typeof client.sendQuery).toBe('function');
     });
 
+    test('returns VercelAiClient for vercel-ai type', () => {
+      const client = getAssistantClient('vercel-ai');
+
+      expect(client).toBeDefined();
+      expect(client.getType()).toBe('vercel-ai');
+      expect(typeof client.sendQuery).toBe('function');
+    });
+
     test('throws error for unknown type', () => {
       expect(() => getAssistantClient('unknown')).toThrow(
-        "Unknown assistant type: unknown. Supported types: 'claude', 'codex'"
+        "Unknown assistant type: unknown. Supported types: 'claude', 'codex', 'vercel-ai'"
       );
     });
 
     test('throws error for empty string', () => {
       expect(() => getAssistantClient('')).toThrow(
-        "Unknown assistant type: . Supported types: 'claude', 'codex'"
+        "Unknown assistant type: . Supported types: 'claude', 'codex', 'vercel-ai'"
       );
     });
 
     test('is case sensitive - Claude throws', () => {
       expect(() => getAssistantClient('Claude')).toThrow(
-        "Unknown assistant type: Claude. Supported types: 'claude', 'codex'"
+        "Unknown assistant type: Claude. Supported types: 'claude', 'codex', 'vercel-ai'"
       );
     });
 

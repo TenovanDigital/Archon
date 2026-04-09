@@ -1509,7 +1509,7 @@ export interface components {
       trigger_rule?: 'all_success' | 'one_success' | 'none_failed_min_one_success' | 'all_done';
       model?: string;
       /** @enum {string} */
-      provider?: 'claude' | 'codex';
+      provider?: 'claude' | 'codex' | 'vercel-ai';
       /** @enum {string} */
       context?: 'fresh' | 'shared';
       output_format?: {
@@ -1692,7 +1692,7 @@ export interface components {
       name: string;
       description: string;
       /** @enum {string} */
-      provider?: 'claude' | 'codex';
+      provider?: 'claude' | 'codex' | 'vercel-ai';
       model?: string;
       /** @enum {string} */
       modelReasoningEffort?: 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
@@ -1826,7 +1826,7 @@ export interface components {
     SafeConfig: {
       botName: string;
       /** @enum {string} */
-      assistant: 'claude' | 'codex';
+      assistant: 'claude' | 'codex' | 'vercel-ai';
       assistants: {
         claude: {
           model?: string;
@@ -1837,6 +1837,9 @@ export interface components {
           modelReasoningEffort?: 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
           /** @enum {string} */
           webSearchMode?: 'disabled' | 'cached' | 'live';
+        };
+        'vercel-ai': {
+          model?: string;
         };
       };
       streaming: {
@@ -1864,7 +1867,7 @@ export interface components {
     };
     UpdateAssistantConfigBody: {
       /** @enum {string} */
-      assistant?: 'claude' | 'codex';
+      assistant?: 'claude' | 'codex' | 'vercel-ai';
       claude?: {
         model: string;
       };
@@ -1874,6 +1877,9 @@ export interface components {
         modelReasoningEffort?: 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
         /** @enum {string} */
         webSearchMode?: 'disabled' | 'cached' | 'live';
+      };
+      'vercel-ai'?: {
+        model: string;
       };
     };
     IsolationEnvironment: {

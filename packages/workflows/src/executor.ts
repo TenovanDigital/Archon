@@ -12,7 +12,7 @@ import type { WorkflowDefinition, WorkflowRun, WorkflowExecutionResult } from '.
 import { executeDagWorkflow } from './dag-executor';
 import { logWorkflowStart, logWorkflowError } from './logger';
 import { getWorkflowEventEmitter } from './event-emitter';
-import { isClaudeModel, isModelCompatible } from './model-validation';
+import { isClaudeModel, isVercelAiModel, isModelCompatible } from './model-validation';
 import { classifyError } from './executor-shared';
 
 /** Lazy-initialized logger (deferred so test mocks can intercept createLogger) */
@@ -278,13 +278,16 @@ export async function executeWorkflow(
   // Resolve provider and model once (used by all nodes)
   // When workflow sets a model but not a provider, infer provider from the model.
   // e.g. model: sonnet → provider: claude, even if config.assistant is codex.
-  let resolvedProvider: 'claude' | 'codex';
+  let resolvedProvider: 'claude' | 'codex' | 'vercel-ai';
   let providerSource: string;
   if (workflow.provider) {
     resolvedProvider = workflow.provider;
     providerSource = 'workflow definition';
   } else if (workflow.model && isClaudeModel(workflow.model)) {
     resolvedProvider = 'claude';
+    providerSource = 'inferred from workflow model';
+  } else if (workflow.model && isVercelAiModel(workflow.model)) {
+    resolvedProvider = 'vercel-ai';
     providerSource = 'inferred from workflow model';
   } else if (workflow.model) {
     resolvedProvider = 'codex';

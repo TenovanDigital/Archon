@@ -1,6 +1,9 @@
 /**
  * Core type definitions for the Remote Coding Agent platform
  */
+
+export type AssistantProvider = 'claude' | 'codex' | 'vercel-ai';
+
 import type { TransitionTrigger } from '../state/session-transitions';
 import type { WorkflowDefinition } from '@archon/workflows/schemas/workflow';
 import type { McpServerConfig, AgentDefinition } from '@anthropic-ai/claude-agent-sdk';

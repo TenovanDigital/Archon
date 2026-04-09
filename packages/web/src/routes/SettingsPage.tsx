@@ -460,6 +460,7 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
   const [assistant, setAssistant] = useState(config.assistant);
   const [claudeModel, setClaudeModel] = useState(config.assistants.claude.model ?? 'sonnet');
   const [codexModel, setCodexModel] = useState(config.assistants.codex.model ?? '');
+  const [vercelAiModel, setVercelAiModel] = useState(config.assistants['vercel-ai']?.model ?? '');
   const [reasoning, setReasoning] = useState<'minimal' | 'low' | 'medium' | 'high' | 'xhigh'>(
     config.assistants.codex.modelReasoningEffort ?? 'medium'
   );
@@ -472,6 +473,7 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
     assistant !== config.assistant ||
     claudeModel !== (config.assistants.claude.model ?? 'sonnet') ||
     codexModel !== (config.assistants.codex.model ?? '') ||
+    vercelAiModel !== (config.assistants['vercel-ai']?.model ?? '') ||
     reasoning !== (config.assistants.codex.modelReasoningEffort ?? 'medium') ||
     webSearch !== (config.assistants.codex.webSearchMode ?? 'disabled');
 
@@ -479,6 +481,7 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
     setAssistant(config.assistant);
     setClaudeModel(config.assistants.claude.model ?? 'sonnet');
     setCodexModel(config.assistants.codex.model ?? '');
+    setVercelAiModel(config.assistants['vercel-ai']?.model ?? '');
     setReasoning(config.assistants.codex.modelReasoningEffort ?? 'medium');
     setWebSearch(config.assistants.codex.webSearchMode ?? 'disabled');
   }, [config]);
@@ -508,6 +511,7 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
             codex: { model: codexModel, modelReasoningEffort: reasoning, webSearchMode: webSearch },
           }
         : {}),
+      ...(vercelAiModel ? { 'vercel-ai': { model: vercelAiModel } } : {}),
     });
   }
 
@@ -524,12 +528,13 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
               id="default-assistant"
               value={assistant}
               onChange={e => {
-                setAssistant(e.target.value as 'claude' | 'codex');
+                setAssistant(e.target.value as 'claude' | 'codex' | 'vercel-ai');
               }}
               className={selectClass}
             >
               <option value="claude">Claude</option>
               <option value="codex">Codex</option>
+              <option value="vercel-ai">Vercel AI</option>
             </select>
 
             <label htmlFor="claude-model">Claude Model</label>
@@ -585,6 +590,16 @@ function AssistantConfigSection({ config }: { config: SafeConfigResponse }): Rea
               <option value="cached">cached</option>
               <option value="live">live</option>
             </select>
+
+            <label htmlFor="vercel-ai-model">Vercel AI Model</label>
+            <Input
+              id="vercel-ai-model"
+              value={vercelAiModel}
+              onChange={e => {
+                setVercelAiModel(e.target.value);
+              }}
+              placeholder="ollama/llama3"
+            />
           </div>
 
           <div className="flex items-center gap-3">

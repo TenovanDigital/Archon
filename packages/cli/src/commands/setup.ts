@@ -45,7 +45,7 @@ interface SetupConfig {
     claudeOauthToken?: string;
     codex: boolean;
     codexTokens?: CodexTokens;
-    defaultAssistant: 'claude' | 'codex';
+    defaultAssistant: 'claude' | 'codex' | 'vercel-ai';
   };
   platforms: {
     github: boolean;
@@ -677,14 +677,15 @@ After upgrading, run 'archon setup' again.`,
   }
 
   // Determine default assistant
-  let defaultAssistant: 'claude' | 'codex' = 'claude';
+  let defaultAssistant: 'claude' | 'codex' | 'vercel-ai' = 'claude';
 
   if (hasClaude && hasCodex) {
     const defaultChoice = await select({
       message: 'Which should be the default AI assistant?',
       options: [
-        { value: 'claude', label: 'Claude (Recommended)' },
-        { value: 'codex', label: 'Codex' },
+        { value: 'claude' as const, label: 'Claude (Recommended)' },
+        { value: 'codex' as const, label: 'Codex' },
+        { value: 'vercel-ai' as const, label: 'Vercel AI (Ollama, OpenAI, Groq, etc.)' },
       ],
     });
 
